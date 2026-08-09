@@ -34,15 +34,26 @@
       color: #f9fafb;
     }
 
-    .container {
-      max-width: 600px;
-      text-align: center;
-      padding: 2.5rem 1.5rem;
-      border-radius: 1rem;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-    }
+   .container {
+  max-width: 600px;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  animation: pulseGlow 2.2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(148, 163, 184, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(148, 163, 184, 0.7);
+  }
+}
+
 
     .logo {
       font-weight: 700;
@@ -54,15 +65,32 @@
     }
 
     h1 {
-      font-size: 2.2rem;
-      margin-bottom: 0.75rem;
-    }
+  font-size: 2.2rem;
+  margin-bottom: 0.75rem;
+  animation: blinkSoft 1.8s ease-in-out infinite;
+}
+
+@keyframes blinkSoft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
 
     p.subtitle {
       font-size: 1rem;
       color: #d1d5db;
       margin-bottom: 1.75rem;
     }
+.subtitle {
+  font-size: 1rem;
+  color: #d1d5db;
+  margin-bottom: 1.75rem;
+  animation: hardBlink 1s step-start infinite;
+}
+
+@keyframes hardBlink {
+  50% { opacity: 0; }
+}
 
     .footer {
       margin-top: 1.5rem;
