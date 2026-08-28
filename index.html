@@ -3193,74 +3193,186 @@ document.addEventListener(
    GOOGLE APPS SCRIPT RESPONSE
 ========================================================= */
 
-window.addEventListener("message", function(event) {
+window.addEventListener(
+  "message",
+  function (event) {
 
-  console.log("MESSAGE RECEIVED:", event.data);
-  console.log("MESSAGE ORIGIN:", event.origin);
+    let data;
 
-  let data;
+    try {
 
-  try {
+      data =
+        typeof event.data === "string"
+          ? JSON.parse(event.data)
+          : event.data;
 
-    data =
-      typeof event.data === "string"
-        ? JSON.parse(event.data)
-        : event.data;
+    } catch (error) {
 
-  } catch (error) {
+      return;
 
-    console.log("Not JSON:", event.data);
-    return;
+    }
 
-  }
 
-  if (
-    !data ||
-    data.type !== "KEA_FORM_RESPONSE"
-  ) {
+    if (
+      !data ||
+      typeof data !== "object" ||
+      data.type !== "KEA_FORM_RESPONSE"
+    ) {
 
-    console.log("Not a KEA response:", data);
-    return;
+      return;
 
-  }
+    }
 
-  console.log("KEA RESPONSE RECEIVED:", data);
 
-  if (!submitting) {
-    return;
-  }
+    if (!submitting) {
 
-  if (data.success === true) {
+      return;
+
+    }
+
+
+    console.log(
+      "KEA response:",
+      data
+    );
+
+
+    if (
+      data.success === true
+    ) {
+
+      resetSubmission();
+
+
+      showStatus(
+        data.message ||
+        "Thank you. Your requirement has been received successfully.",
+        "success"
+      );
+
+
+      form.reset();
+
+
+      userAgentInput.value =
+        navigator.userAgent || "";
+
+
+      const consent =
+        getLocationConsent();
+
+
+      if (
+        consent === "granted"
+      ) {
+
+        locationPermission.value =
+          "previously_granted";
+
+      } else if (
+        consent === "denied"
+      ) {
+
+        locationPermission.value =
+          "previously_denied";
+
+      } else if (
+        consent === "unavailable"
+      ) {
+
+        locationPermission.value =
+          "unavailable";
+
+      } else {
+
+        locationPermission.value =
+          "not_requested";
+
+      }
+
+
+      clearLocation();
+
+
+      nameInput.focus();
+
+
+      return;
+
+    }
+
 
     resetSubmission();
 
+
     showStatus(
       data.message ||
-      "Thank you. Your requirement has been received successfully.",
-      "success"
+      "Your request could not be processed. Please try again.",
+      "error"
     );
 
-    form.reset();
-
-    userAgentInput.value =
-      navigator.userAgent || "";
-
-    clearLocation();
-
-    nameInput.focus();
-
-    return;
   }
+);
 
-  resetSubmission();
+/* =========================================================
+   IFRAME RESPONSE FALLBACK
+========================================================= */
 
-  showStatus(
-    data.message ||
-    "Your request could not be processed.",
-    "error"
-  );
+iframe.addEventListener(
+  "load",
+  function () {
 
-});
+    if (!submitting) {
+
+      return;
+
+    }
+
+
+    /*
+     * Apps Script has completed the POST and
+     * returned a response to the iframe.
+     *
+     * Give postMessage a moment to arrive first.
+     */
+
+    window.setTimeout(
+      function () {
+
+        if (!submitting) {
+
+          return;
+
+        }
+
+
+        resetSubmission();
+
+
+        showStatus(
+          "Thank you. Your requirement has been received successfully.",
+          "success"
+        );
+
+
+        form.reset();
+
+
+        userAgentInput.value =
+          navigator.userAgent || "";
+
+
+        clearLocation();
+
+
+        nameInput.focus();
+
+      },
+      500
+    );
+
+  }
+);
 
 
 /* =========================================================
@@ -3430,7 +3542,7 @@ form.addEventListener(
           );
 
         },
-        30000
+        60000
       );
 
   }
