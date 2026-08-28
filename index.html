@@ -3193,127 +3193,74 @@ document.addEventListener(
    GOOGLE APPS SCRIPT RESPONSE
 ========================================================= */
 
-window.addEventListener(
-  "message",
-  function (event) {
+window.addEventListener("message", function(event) {
 
-    const data =
-      event.data;
+  console.log("MESSAGE RECEIVED:", event.data);
+  console.log("MESSAGE ORIGIN:", event.origin);
 
+  let data;
 
-    /*
-     * Ignore unrelated messages.
-     */
+  try {
 
-    if (
-      !data ||
-      typeof data !== "object" ||
-      data.type !== "KEA_FORM_RESPONSE"
-    ) {
+    data =
+      typeof event.data === "string"
+        ? JSON.parse(event.data)
+        : event.data;
 
-      return;
+  } catch (error) {
 
-    }
+    console.log("Not JSON:", event.data);
+    return;
 
+  }
 
-    /*
-     * Ignore responses when we are not
-     * waiting for a submission.
-     */
+  if (
+    !data ||
+    data.type !== "KEA_FORM_RESPONSE"
+  ) {
 
-    if (!submitting) {
+    console.log("Not a KEA response:", data);
+    return;
 
-      return;
+  }
 
-    }
+  console.log("KEA RESPONSE RECEIVED:", data);
 
+  if (!submitting) {
+    return;
+  }
 
-    console.log(
-      "KEA response:",
-      data
-    );
-
-
-    /* SUCCESS */
-
-    if (
-      data.success === true
-    ) {
-
-      resetSubmission();
-
-
-      showStatus(
-        data.message ||
-        "Thank you. Your requirement has been received successfully.",
-        "success"
-      );
-
-
-      form.reset();
-
-
-      userAgentInput.value =
-        navigator.userAgent || "";
-
-
-      const consent =
-        getLocationConsent();
-
-
-      if (
-        consent === "granted"
-      ) {
-
-        locationPermission.value =
-          "previously_granted";
-
-      } else if (
-        consent === "denied"
-      ) {
-
-        locationPermission.value =
-          "previously_denied";
-
-      } else if (
-        consent === "unavailable"
-      ) {
-
-        locationPermission.value =
-          "unavailable";
-
-      } else {
-
-        locationPermission.value =
-          "not_requested";
-
-      }
-
-
-      clearLocation();
-
-
-      nameInput.focus();
-
-
-      return;
-
-    }
-
-
-    /* FAILURE */
+  if (data.success === true) {
 
     resetSubmission();
 
-
     showStatus(
       data.message ||
-      "Your request could not be processed. Please try again.",
-      "error"
+      "Thank you. Your requirement has been received successfully.",
+      "success"
     );
 
+    form.reset();
+
+    userAgentInput.value =
+      navigator.userAgent || "";
+
+    clearLocation();
+
+    nameInput.focus();
+
+    return;
   }
-);
+
+  resetSubmission();
+
+  showStatus(
+    data.message ||
+    "Your request could not be processed.",
+    "error"
+  );
+
+});
 
 
 /* =========================================================
